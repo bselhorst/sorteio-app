@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Administração</title>
+</head>
+<body>
+  <h1>Administração do Sorteio</h1>
+  
+  <div>
+    <h2>Lista de Pessoas</h2>
+    <ul>
+      <% pessoas.forEach(pessoa => { %>
+        <li>
+          <%= pessoa.nome %> (<%= pessoa.codigo %>)
+          <form action="/remover/<%= pessoa.id %>" method="POST" style="display:inline;">
+            <button type="submit">Remover</button>
+          </form>
+        </li>
+      <% }); %>
+    </ul>
+  </div>
+  
+  <h3>Último Sorteado: <span id="ultimo-sorteado">Aguardando sorteio...</span></h3>
+
+  <form action="/sortear" method="POST">
+    <button type="submit">Realizar Sorteio</button>
+  </form>
+
+  <form action="/resetar" method="POST" style="margin-top: 20px;">
+    <button type="submit">Resetar Telas</button>
+  </form>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+
+    // Atualiza a lista de quem foi sorteado na tela de administração
+    socket.on('sorteio', (sorteada) => {
+      document.getElementById('ultimo-sorteado').textContent = sorteada.nome;
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Aguardando Sorteio</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+      transition: background-color 1s;
+    }
+    .sorteada {
+      background-color: green;
+      color: white;
+    }
+    .nao-sorteada {
+      background-color: red;
+      color: white;
+    }
+    .preta {
+      background-color: black;
+      color: white;
+    }
+    .esperando {
+      background-color: yellow;
+      color: black;
+    }
+    .loading {
+      font-size: 24px;
+      font-weight: bold;
+      margin-top: 20px;
+    }
+    .fade {
+      opacity: 0;
+      animation: fadein 10s forwards;
+    }
+    @keyframes fadein {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+  </style>
+</head>
+<body class="esperando">
+  <h1>Aguardando Sorteio...</h1>
+  <p>Código: <%= pessoa.codigo %></p>
+  <p>Nome: <%= pessoa.nome %></p>
+
+  <div class="loading fade">Sorteio em andamento...</div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+
+    // Quando o sorteio está em andamento, a tela de todos ficará preta
+    socket.on('sorteio-em-andamento', () => {
+      document.body.classList.add('preta');
+      document.body.classList.remove('esperando');
+      document.querySelector('.loading').textContent = 'Sorteio em andamento...';
+    });
+
+    // Resetar a tela de todos (incluindo a do sorteado)
+    socket.on('resetar-telas', () => {
+      document.body.classList.remove('preta', 'sorteada', 'nao-sorteada');
+      document.body.classList.add('esperando');
+      document.querySelector('.loading').textContent = 'Aguardando Sorteio...';
+    });
+
+    // Ao receber o sorteio, a tela muda de cor
+    socket.on('sorteio', (sorteada) => {
+      if (sorteada.codigo === '<%= pessoa.codigo %>') {
+        document.body.classList.add('sorteada');
+        document.body.classList.remove('preta');
+        document.querySelector('.loading').textContent = 'Você foi sorteado!';
+      } else {
+        document.body.classList.add('nao-sorteada');
+        document.body.classList.remove('preta');
+        document.querySelector('.loading').textContent = 'Você não foi sorteado!';
+      }
+    });
+  </script>
+</body>
+</html>
